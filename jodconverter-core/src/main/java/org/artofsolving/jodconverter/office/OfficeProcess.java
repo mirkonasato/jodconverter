@@ -207,9 +207,16 @@ class OfficeProcess {
     }
 
     public int forciblyTerminate(long retryInterval, long retryTimeout) throws IOException, RetryTimeoutException {
-        logger.info(String.format("trying to forcibly terminate process: '" + unoUrl + "'" + (pid != PID_UNKNOWN ? " (pid " + pid  + ")" : "")));
-        processManager.kill(process, pid);
+        this.logger.info("trying to forcibly terminate process: '" + this.unoUrl + "'"
+            + (this.pid != PID_UNKNOWN ? " (pid " + this.pid + ")" : ""));
+        if (this.pid == PID_UNKNOWN) {
+            long foundPid = this.processManager.findPid(new ProcessQuery("soffice.*", this.unoUrl.getAcceptString()));
+            if (foundPid != PID_UNKNOWN) {
+                this.processManager.kill(this.process, foundPid);
+            }
+        } else {
+            this.processManager.kill(this.process, this.pid);
+        }
         return getExitCode(retryInterval, retryTimeout);
     }
-
 }
