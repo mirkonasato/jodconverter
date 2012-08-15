@@ -205,9 +205,7 @@ class OfficeProcess {
             + (this.pid != PID_UNKNOWN ? " (pid " + this.pid + ")" : ""));
         if (this.pid == PID_UNKNOWN) {
             long foundPid = this.processManager.findPid(new ProcessQuery("soffice.*", this.unoUrl.getAcceptString()));
-            if (foundPid != PID_UNKNOWN) {
-                this.processManager.kill(this.process, foundPid);
-            }
+            this.processManager.kill(this.process, foundPid);
         } else {
             this.processManager.kill(this.process, this.pid);
         }
