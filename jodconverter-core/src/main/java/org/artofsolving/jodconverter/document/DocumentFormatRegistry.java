@@ -20,6 +20,5 @@ public interface DocumentFormatRegistry {
 
     public DocumentFormat getFormatByMediaType(String mediaType);
 
-    public Set<DocumentFormat> getOutputFormats(DocumentFamily family); 
-
+    public Set<DocumentFormat> getOutputFormats(DocumentFamily family);
 }

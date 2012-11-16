@@ -30,6 +30,7 @@ import org.hyperic.sigar.ptql.ProcessFinder;
  */
 public class SigarProcessManager implements ProcessManager {
 
+    @Override
     public long findPid(ProcessQuery query) throws IOException {
         Sigar sigar = new Sigar();
         try {
@@ -48,6 +49,7 @@ public class SigarProcessManager implements ProcessManager {
         }
     }
 
+    @Override
     public void kill(Process process, long pid) throws IOException {
         Sigar sigar = new Sigar();
         try {

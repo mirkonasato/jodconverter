@@ -48,6 +48,7 @@ class ManagedOfficeProcess {
 
 	public void startAndWait() throws OfficeException {
 		Future<?> future = executor.submit(new Runnable() {
+            @Override
 			public void run() {
 				doStartProcessAndConnect();
 			}
@@ -61,6 +62,7 @@ class ManagedOfficeProcess {
 
 	public void stopAndWait() throws OfficeException {
 		Future<?> future = executor.submit(new Runnable() {
+            @Override
 			public void run() {
 				doStopProcess();
 			}
@@ -74,6 +76,7 @@ class ManagedOfficeProcess {
 
 	public void restartAndWait() {
 		Future<?> future = executor.submit(new Runnable() {
+            @Override
 			public void run() {
 				doStopProcess();
 				doStartProcessAndConnect();
@@ -88,6 +91,7 @@ class ManagedOfficeProcess {
 
 	public void restartDueToTaskTimeout() {
 		executor.execute(new Runnable() {
+            @Override
 			public void run() {
 				doTerminateProcess();
 				// will cause unexpected disconnection and subsequent restart
@@ -97,6 +101,7 @@ class ManagedOfficeProcess {
 
 	public void restartDueToLostConnection() {
 		executor.execute(new Runnable() {
+            @Override
 			public void run() {
 				try {
 					doEnsureProcessExited();
@@ -112,6 +117,7 @@ class ManagedOfficeProcess {
 		try {
 			process.start();
 			new Retryable() {
+                @Override
 				protected void attempt() throws TemporaryException, Exception {
 					try {
 						connection.connect();

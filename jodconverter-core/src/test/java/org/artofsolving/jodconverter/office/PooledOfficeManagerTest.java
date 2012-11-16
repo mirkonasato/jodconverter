@@ -23,13 +23,6 @@ import java.util.concurrent.TimeoutException;
 
 
 import org.artofsolving.jodconverter.ReflectionUtils;
-import org.artofsolving.jodconverter.office.ManagedOfficeProcess;
-import org.artofsolving.jodconverter.office.PooledOfficeManager;
-import org.artofsolving.jodconverter.office.PooledOfficeManagerSettings;
-import org.artofsolving.jodconverter.office.OfficeConnection;
-import org.artofsolving.jodconverter.office.UnoUrl;
-import org.artofsolving.jodconverter.office.OfficeException;
-import org.artofsolving.jodconverter.office.OfficeProcess;
 import org.testng.annotations.Test;
 
 @Test(groups="integration")
@@ -70,6 +63,7 @@ public class PooledOfficeManagerTest {
         assertTrue(connection.isConnected());
         
         new Thread() {
+            @Override
             public void run() {
                 MockOfficeTask badTask = new MockOfficeTask(10 * 1000);
                 try {

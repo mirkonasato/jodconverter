@@ -43,5 +43,4 @@ class OfficeDocumentUtils {
             throw new OfficeException("document of unknown family: " + serviceInfo.getImplementationName());
         }
     }
-
 }

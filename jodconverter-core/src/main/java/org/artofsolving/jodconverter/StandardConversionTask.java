@@ -28,8 +28,7 @@ import com.sun.star.util.XRefreshable;
 public class StandardConversionTask extends AbstractConversionTask {
 
     private final DocumentFormat outputFormat;
-
-    private Map<String,?> defaultLoadProperties;
+    private Map<String, ?> defaultLoadProperties;
     private DocumentFormat inputFormat;
 
     public StandardConversionTask(File inputFile, File outputFile, DocumentFormat outputFormat) {
@@ -54,8 +53,8 @@ public class StandardConversionTask extends AbstractConversionTask {
     }
 
     @Override
-    protected Map<String,?> getLoadProperties(File inputFile) {
-        Map<String,Object> loadProperties = new HashMap<String,Object>();
+    protected Map<String, ?> getLoadProperties(File inputFile) {
+        Map<String, Object> loadProperties = new HashMap<String, Object>();
         if (defaultLoadProperties != null) {
             loadProperties.putAll(defaultLoadProperties);
         }
@@ -66,9 +65,8 @@ public class StandardConversionTask extends AbstractConversionTask {
     }
 
     @Override
-    protected Map<String,?> getStoreProperties(File outputFile, XComponent document) {
+    protected Map<String, ?> getStoreProperties(File outputFile, XComponent document) {
         DocumentFamily family = OfficeDocumentUtils.getDocumentFamily(document);
         return outputFormat.getStoreProperties(family);
     }
-
 }

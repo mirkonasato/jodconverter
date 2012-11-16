@@ -46,6 +46,7 @@ class OfficeConnection implements OfficeContext {
     private volatile boolean connected = false;
 
     private XEventListener bridgeListener = new XEventListener() {
+        @Override
         public void disposing(EventObject event) {
             if (connected) {
                 connected = false;
@@ -106,6 +107,7 @@ class OfficeConnection implements OfficeContext {
         bridgeComponent.dispose();
     }
 
+    @Override
     public Object getService(String serviceName) {
         try {
             return serviceManager.createInstanceWithContext(serviceName, componentContext);

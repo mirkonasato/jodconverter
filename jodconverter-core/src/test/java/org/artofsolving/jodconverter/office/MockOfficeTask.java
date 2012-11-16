@@ -14,9 +14,6 @@ package org.artofsolving.jodconverter.office;
 
 import static org.artofsolving.jodconverter.office.OfficeUtils.*;
 
-import org.artofsolving.jodconverter.office.OfficeContext;
-import org.artofsolving.jodconverter.office.OfficeException;
-import org.artofsolving.jodconverter.office.OfficeTask;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XComponentLoader;
@@ -37,6 +34,7 @@ public class MockOfficeTask implements OfficeTask {
         this.delayTime = delayTime;
     }
 
+    @Override
     public void execute(OfficeContext context) throws OfficeException {
         XComponentLoader loader = cast(XComponentLoader.class, context.getService(SERVICE_DESKTOP));
         assert loader != null : "desktop object is null";

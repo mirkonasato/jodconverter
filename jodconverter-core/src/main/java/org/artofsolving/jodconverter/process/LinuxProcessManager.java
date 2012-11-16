@@ -41,6 +41,7 @@ public class LinuxProcessManager implements ProcessManager {
         return new String[] { "/bin/ps", "-e", "-o", "pid,args" };
     }
 
+    @Override
     public long findPid(ProcessQuery query) throws IOException {
         String regex = Pattern.quote(query.getCommand()) + ".*" + Pattern.quote(query.getArgument());
         Pattern commandPattern = Pattern.compile(regex);
@@ -57,6 +58,7 @@ public class LinuxProcessManager implements ProcessManager {
         return PID_NOT_FOUND;
     }
 
+    @Override
     public void kill(Process process, long pid) throws IOException {
     	if (pid <= 0) {
     		throw new IllegalArgumentException("invalid pid: " + pid);

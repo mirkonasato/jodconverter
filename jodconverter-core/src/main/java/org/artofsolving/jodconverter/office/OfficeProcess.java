@@ -166,6 +166,7 @@ class OfficeProcess {
         
         private int exitCode;
         
+        @Override
         protected void attempt() throws TemporaryException, Exception {
             try {
                 exitCode = process.exitValue();
