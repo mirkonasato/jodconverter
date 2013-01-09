@@ -35,6 +35,7 @@ public class DefaultOfficeManagerConfiguration {
     private long taskExecutionTimeout = 120000L;  // 2 minutes
     private int maxTasksPerProcess = 200;
     private long retryTimeout = DEFAULT_RETRY_TIMEOUT;
+    private boolean offsetMaxTasksPerProcess;
 
     private ProcessManager processManager = null;  // lazily initialised
 
@@ -152,6 +153,16 @@ public class DefaultOfficeManagerConfiguration {
         return this;
     }
 
+    /**
+     * Will set every second office process to have its task count set to half the max on initiation.
+     * @param offsetMaxTasksPerProcess
+     * @return
+     */
+    public DefaultOfficeManagerConfiguration setOffsetMaxTasksPerProcess(boolean offsetMaxTasksPerProcess){
+        this.offsetMaxTasksPerProcess = offsetMaxTasksPerProcess;
+        return this;
+    }
+
     public OfficeManager buildOfficeManager() throws IllegalStateException {
         if (officeHome == null) {
             throw new IllegalStateException("officeHome not set and could not be auto-detected");
@@ -176,7 +187,7 @@ public class DefaultOfficeManagerConfiguration {
         for (int i = 0; i < numInstances; i++) {
             unoUrls[i] = (connectionProtocol == OfficeConnectionProtocol.PIPE) ? UnoUrl.pipe(pipeNames[i]) : UnoUrl.socket(portNumbers[i]);
         }
-        return new ProcessPoolOfficeManager(officeHome, unoUrls, runAsArgs, templateProfileDir, workDir, retryTimeout, taskQueueTimeout, taskExecutionTimeout, maxTasksPerProcess, processManager);
+        return new ProcessPoolOfficeManager(officeHome, unoUrls, runAsArgs, templateProfileDir, workDir, retryTimeout, taskQueueTimeout, taskExecutionTimeout, maxTasksPerProcess, processManager, offsetMaxTasksPerProcess);
     }
 
     private ProcessManager findBestProcessManager() {
