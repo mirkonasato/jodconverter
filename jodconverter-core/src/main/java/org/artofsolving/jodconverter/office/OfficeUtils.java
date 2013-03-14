@@ -12,7 +12,9 @@
 //
 package org.artofsolving.jodconverter.office;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.util.Map;
 
 import org.artofsolving.jodconverter.util.PlatformUtils;
@@ -71,30 +73,81 @@ public class OfficeUtils {
                 programFiles = System.getenv("ProgramFiles");
             }
             return findOfficeHome(
-                programFiles + File.separator + "OpenOffice.org 3",
-                programFiles + File.separator + "LibreOffice 3"
+                programFiles + File.separator + "OpenOffice.org",
+                programFiles + File.separator + "LibreOffice"
             );
         } else if (PlatformUtils.isMac()) {
-            return findOfficeHome(
+            File officeHome = findOfficeHome(
                 "/Applications/OpenOffice.org.app/Contents",
                 "/Applications/LibreOffice.app/Contents"
             );
+
+            // Try with locate
+            if (officeHome == null) {
+            	officeHome = locateOfficeHome();
+            }
+            return officeHome;
         } else {
             // Linux or other *nix variants
-            return findOfficeHome(
-                "/opt/openoffice.org3",
+            File officeHome = findOfficeHome(
+                "/opt/openoffice",
                 "/opt/libreoffice",
                 "/usr/lib/openoffice",
-                "/usr/lib/libreoffice"
+                "/usr/lib/libreoffice",
+                "/usr/local/lib/openoffice",
+                "/usr/local/lib/libreoffice"
+
             );
+
+            // Try with locate
+            if (officeHome == null) {
+            	officeHome = locateOfficeHome();
+            }
+            return officeHome;
         }
+    }
+
+    private static File locateOfficeHome() {
+
+        String s = null;
+        String cmd = "locate soffice.bin";
+        try {
+        	Process p = Runtime.getRuntime().exec(cmd);
+        	int i = p.waitFor();
+        	if (i == 0){
+        		BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+        		// read the output from the command
+        		while ((s = stdInput.readLine()) != null) {
+        			File f = new File(s);
+        			if (f.exists() && f.getName().equalsIgnoreCase("soffice.bin") && f.getParentFile() != null && f.getParentFile().getParentFile() != null) {
+        				return f.getParentFile().getParentFile();
+        			}
+        		}
+        	}
+        	else {
+        		BufferedReader stdErr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+        		// read the error output from the command
+        		while ((s = stdErr.readLine()) != null) {
+        		}
+        	}
+        } catch (Throwable th) {
+        }
+        return null;
     }
 
     private static File findOfficeHome(String... knownPaths) {
         for (String path : knownPaths) {
             File home = new File(path);
-            if (getOfficeExecutable(home).isFile()) {
-                return home;
+            File containerPath = home.getParentFile();
+            if (containerPath != null && containerPath.isDirectory()) {
+            	for (File subDir : containerPath.listFiles()) {
+            		if (subDir.isDirectory() && subDir.getName().startsWith(home.getName())) {
+                        if (getOfficeExecutable(subDir).isFile()) {
+                            return home;
+                        }
+            		}
+            	}
             }
         }
         return null;
@@ -107,5 +160,4 @@ public class OfficeUtils {
             return new File(officeHome, "program/soffice.bin");
         }
     }
-
 }
