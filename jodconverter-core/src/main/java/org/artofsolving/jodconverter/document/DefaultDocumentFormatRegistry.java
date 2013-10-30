@@ -24,6 +24,7 @@ public class DefaultDocumentFormatRegistry extends SimpleDocumentFormatRegistry 
 		pdf.setStoreProperties(DocumentFamily.SPREADSHEET, Collections.singletonMap("FilterName", "calc_pdf_Export"));
 		pdf.setStoreProperties(DocumentFamily.PRESENTATION, Collections.singletonMap("FilterName", "impress_pdf_Export"));
 		pdf.setStoreProperties(DocumentFamily.DRAWING, Collections.singletonMap("FilterName", "draw_pdf_Export"));
+		pdf.setStoreProperties(DocumentFamily.TEXT_WEB, Collections.singletonMap("FilterName", "writer_web_pdf_Export"));
 		addFormat(pdf);
 		
 		DocumentFormat swf = new DocumentFormat("Macromedia Flash", "swf", "application/x-shockwave-flash");

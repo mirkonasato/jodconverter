@@ -29,7 +29,11 @@ class OfficeDocumentUtils {
 
     public static DocumentFamily getDocumentFamily(XComponent document) throws OfficeException {
         XServiceInfo serviceInfo = cast(XServiceInfo.class, document);
-        if (serviceInfo.supportsService("com.sun.star.text.GenericTextDocument")) {
+        if (serviceInfo.supportsService("com.sun.star.text.WebDocument")) {
+            // if the document is identified as a WebDocument then the web PDF export filter must be used.
+            // otherwise error 2074 will occur.
+            return DocumentFamily.TEXT_WEB;
+        } else if (serviceInfo.supportsService("com.sun.star.text.GenericTextDocument")) {
             // NOTE: a GenericTextDocument is either a TextDocument, a WebDocument, or a GlobalDocument
             // but this further distinction doesn't seem to matter for conversions
             return DocumentFamily.TEXT;
