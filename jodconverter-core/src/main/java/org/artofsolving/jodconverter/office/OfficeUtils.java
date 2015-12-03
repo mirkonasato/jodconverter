@@ -77,7 +77,8 @@ public class OfficeUtils {
         } else if (PlatformUtils.isMac()) {
             return findOfficeHome(
                 "/Applications/OpenOffice.org.app/Contents",
-                "/Applications/LibreOffice.app/Contents"
+                "/Applications/LibreOffice.app/Contents",
+                "/Applications/OpenOffice.app/Contents"
             );
         } else {
             // Linux or other *nix variants
