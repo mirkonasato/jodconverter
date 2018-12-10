@@ -1,0 +1,10 @@
+description = 'JODConverter - Spring'
+
+dependencies {
+  compile project(':jodconverter-local')
+  compile libraries.slf4j_log4j
+  compile libraries.spring_core
+  compile libraries.spring_context
+
+  compile libraries.spring_test
+}

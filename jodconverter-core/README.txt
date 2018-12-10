@@ -1,20 +1,23 @@
-JODConverter
-============
+JODConverter - Core
+===================
 
-This is JODConverter 3.0 beta.
+This is the core module of the Java OpenDocument
+Converter (JODConverter) project.
 
-JODConverter automates conversions between office document formats
-using LibreOffice or Apache OpenOffice. 
-
-See http://jodconverter.googlecode.com for the latest documentation.
+JODConverter automates conversions between office
+document formats using LibreOffice or Apache OpenOffice.
 
 Licensing
 ---------
 
-JODConverter is open source software, you can redistribute it and/or
-modify it under either (at your option) of the following licenses
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-1. The GNU Lesser General Public License v3 (or later)
-   -> see LICENSE-LGPL.txt
-2. The Apache License, Version 2.0
-   -> see LICENSE-Apache.txt
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

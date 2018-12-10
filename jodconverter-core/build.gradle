@@ -1,0 +1,30 @@
+description = 'JODConverter - Core'
+
+dependencies {
+  compile libraries.commons_io
+  compile libraries.commons_lang3
+  compile libraries.gson
+  compile libraries.slf4j_api
+  
+  testCompile libraries.slf4j_log4j
+}
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Tests setup
+
+// Configuration groups used to manage tests dependencies
+// (when test classes depend on test classes from another project)
+
+configurations {
+    tests
+}
+
+task testJar (type: Jar) {
+    from sourceSets.test.output
+    classifier = 'test'
+}
+
+artifacts {
+    tests testJar
+}

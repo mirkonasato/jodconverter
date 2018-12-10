@@ -1,0 +1,265 @@
+// Import the content of the libraries.gradle file
+apply from: "dependencies.gradle"
+
+description = 'JODConverter'
+
+// External dependencies for the build script
+buildscript {
+  
+  // Gradle will not find vars defined in an external file when referring to them
+  // in the buildscript block, unless you link it from the buildscript block, too.
+  apply from: "dependencies.gradle"
+
+  repositories {
+    mavenCentral()
+
+    //Needed only for SNAPSHOT versions
+    //maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://plugins.gradle.org/m2" }
+  }
+
+  dependencies {
+    classpath gradlePlugins.coveralls
+    classpath gradlePlugins.dependency_management
+    classpath gradlePlugins.nebula_project
+    classpath gradlePlugins.nexus_staging
+    classpath gradlePlugins.spotless
+  }
+}
+
+ext {
+  baselineJavaVersion = JavaVersion.VERSION_1_8
+  sourceEncoding = "UTF-8"
+
+  // Set up different subproject lists for individual configuration
+  ext.javaprojects = subprojects.findAll { new File(it.projectDir, 'src/main/java').directory }
+  ext.releasedprojects = javaprojects.findAll { !it.name.contains('sample') }
+  ext.publishedprojects = releasedprojects.findAll { !it.name.contains('jodconverter-cli') }
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Configuration to apply to all the projects
+
+allprojects {
+
+  // Add the clean task to all the project
+  apply plugin: 'base'
+  // Generates files for Intellij IDEA
+  apply plugin: 'idea'
+  // Generates files for Eclipse
+  apply plugin: 'eclipse'
+  // Generate reports containing useful information about the build (tasks, dependencies, properties)
+  apply plugin: 'project-report'
+
+  // Set the group and current version
+  group = groupId
+  version = currentVersion
+  
+  // Set the maven repository that looks for plugin dependencies.
+  repositories {
+    mavenCentral()
+  }
+
+  // Eclipse setup
+
+  // Workaround until https://github.com/gradle/gradle/issues/898
+  // is resolved.
+
+  // Several files have UTF-8 encoding and Eclipse running on Windows
+  // will have trouble unless we tell it to use UTF-8 encoding. This
+  // setting needs to go into the org.eclipse.core.resources.prefs file,
+  // which the project script isn't set up to configure.
+  eclipse {
+
+    ext.corePrefsPath = '.settings/org.eclipse.core.resources.prefs'
+
+    ext.genCorePrefs = {
+      File corePrefs = file(corePrefsPath)
+      corePrefs.parentFile.mkdirs()
+      corePrefs.text = """\
+      eclipse.preferences.version=1
+      encoding/<project>=UTF-8
+      """.stripIndent()
+    }
+
+    project {
+      file {
+        // Will be applied when the project is imported into Eclipse
+        genCorePrefs()
+      }
+    }
+
+    // Will be applied after the eclipseProject task
+    eclipseProject.doLast {
+      genCorePrefs()
+    }
+
+    // Will be applied after the cleanEclipse task
+    cleanEclipse.doLast {
+      delete corePrefsPath
+    }
+  }
+
+  tasks.eclipse.dependsOn(cleanEclipse)
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Java projects configuration
+
+// Apply the configuration for the java projects only
+configure(javaprojects) {
+
+  // Spotless needs a buildscript repository for all java project
+  buildscript {
+    repositories {
+      maven { url "https://plugins.gradle.org/m2" }
+    }
+  }
+
+  // Apply the gradle file specific to all java projects
+  apply from: "$rootDir/gradle/java-projects.gradle"
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Code quality control coverage (JaCoCo)
+
+// We need JacocoMerge to aggregate sub projects report
+apply plugin: 'jacoco'
+// Send coverage data to coveralls.io
+apply plugin: 'com.github.kt3k.coveralls'
+
+// Configures the JaCoCo plugin
+jacoco {
+  toolVersion = versions.jacoco_version
+}
+
+// Creates an aggregated JaCoCo executionData for all
+// the tests (unit tests and integration tests) found
+// in sub Java projects 
+task jacocoMerge(type: JacocoMerge) {
+  description = 'Aggregates JaCoCo test and integration test coverage reports of all projects.'
+  group = "Reporting"
+    
+  // Gather execution data from all subprojects
+  releasedprojects.each { subproject ->
+    executionData subproject.tasks.withType(Test)
+  }
+  doFirst {
+    executionData = files(executionData.findAll { it.exists() })
+  }
+}
+
+// Code coverage report for all the sub (java) projects
+task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
+  description = 'Generates an aggregate report from all subprojects'
+  dependsOn releasedprojects.test, releasedprojects.integrationTest, jacocoMerge
+
+  additionalSourceDirs = files(releasedprojects.sourceSets.main.allSource.srcDirs)
+  sourceDirectories = files(releasedprojects.sourceSets.main.allSource.srcDirs)
+  classDirectories = files(releasedprojects.sourceSets.main.output)
+  executionData jacocoMerge.destinationFile
+
+  reports {
+    html.enabled = true // human readable
+    xml.enabled = true // required by coveralls
+  }
+}
+
+coveralls {
+  sourceDirs = releasedprojects.sourceSets.main.allSource.srcDirs.flatten()
+  jacocoReportPath = "${buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
+}
+
+tasks.coveralls {
+  group = 'Coverage reports'
+  description = 'Uploads the aggregated coverage report to Coveralls'
+
+  dependsOn jacocoRootReport
+  onlyIf { System.env.'CI' }
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Distribution configuration
+
+configure(releasedprojects) {
+
+  apply plugin: 'distribution'
+  
+  // exclude jodconverter-cli since it has its own distribution configuration
+  if (!project.name.contains('jodconverter-cli')) {
+    distributions {
+      main {
+        baseName = project.name
+        contents {
+          from jar, sourcesJar, javadocJar
+        }
+      }
+    }
+  }
+}
+
+// Copy all the distributions of the subprojects to the root project
+task distZip(type: Zip) {
+  description "Create full distribution zip"
+  baseName project.name
+  group "Distribution"
+   
+  //from releasedprojects.collect { it.tasks.matching { it.name == 'distZip' || it.name == 'distTar' } }
+  from releasedprojects.collect { it.distZip }
+}
+project.tasks["distZip"].dependsOn releasedprojects*.distZip
+//project.tasks["distZip"].dependsOn releasedprojects*.assembleDist
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Publishing configuration
+
+// Add the ability to release to Maven Central from Gradle without dealing with Nexus UI
+apply plugin: "io.codearte.nexus-staging"
+
+nexusStaging {
+  username = findProperty('ossrhUsername')
+  password = findProperty('ossrhPassword')
+}
+
+// Apply the configuration for the published projects only
+configure(publishedprojects) {
+
+  // Apply the gradle file specific to all published projects
+  apply from: "$rootDir/gradle/published-projects.gradle"
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Utilities
+task printConfigurations {
+  group "Help"
+  doLast {
+  
+    subprojects.findAll().each { p ->
+      println "${p}"
+      p.configurations.each { println "  | " + it.name }
+      println ""
+    }
+  }
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+ 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Install a wrapper in the current projet (gradlew)
+// Latest version -> https://gradle.org/install/
+task wrapper(type: Wrapper) {
+  description = 'Generates gradlew[.bat] scripts'
+  group = "wrapper"
+
+  gradleVersion = '4.5'
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

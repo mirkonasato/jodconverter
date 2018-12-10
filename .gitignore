@@ -1,0 +1,26 @@
+# Build
+out
+bin
+build
+target
+test-output
+
+# Eclipse
+.classpath
+.factorypath
+.project
+.settings
+.checkstyle
+
+# IntelliJ IDEA
+.idea
+*.iml
+
+# Gradle
+.gradle
+
+# Markdown
+*.md.html
+
+# Spring
+.springBeans
