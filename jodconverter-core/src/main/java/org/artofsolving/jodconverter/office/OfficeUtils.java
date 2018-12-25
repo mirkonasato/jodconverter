@@ -71,8 +71,8 @@ public class OfficeUtils {
                 programFiles = System.getenv("ProgramFiles");
             }
             return findOfficeHome(
-                programFiles + File.separator + "OpenOffice.org 3",
-                programFiles + File.separator + "LibreOffice 3"
+                programFiles + File.separator + "OpenOffice.org 5",
+                programFiles + File.separator + "LibreOffice 5"
             );
         } else if (PlatformUtils.isMac()) {
             return findOfficeHome(
@@ -82,7 +82,7 @@ public class OfficeUtils {
         } else {
             // Linux or other *nix variants
             return findOfficeHome(
-                "/opt/openoffice.org3",
+                "/opt/openoffice.org5",
                 "/opt/libreoffice",
                 "/usr/lib/openoffice",
                 "/usr/lib/libreoffice"
