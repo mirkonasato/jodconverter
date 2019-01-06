@@ -39,6 +39,7 @@ public class OfficeDocumentConverterFunctionalTest {
         try {
             File dir = new File("src/test/resources/documents");
             File[] files = dir.listFiles(new FilenameFilter() {
+                @Override
             	public boolean accept(File dir, String name) {
             		return !name.startsWith(".");
             	}

@@ -14,10 +14,12 @@ package org.artofsolving.jodconverter.process;
 
 public class PureJavaProcessManager implements ProcessManager {
 
+    @Override
     public long findPid(ProcessQuery query) {
         return PID_UNKNOWN;
     }
 
+    @Override
     public void kill(Process process, long pid) {
         process.destroy();
     }

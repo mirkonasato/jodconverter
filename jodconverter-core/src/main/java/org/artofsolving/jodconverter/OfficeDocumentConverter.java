@@ -29,8 +29,7 @@ public class OfficeDocumentConverter {
 
     private final OfficeManager officeManager;
     private final DocumentFormatRegistry formatRegistry;
-
-    private Map<String,?> defaultLoadProperties = createDefaultLoadProperties();
+    private Map<String, ?> defaultLoadProperties = createDefaultLoadProperties();
 
     public OfficeDocumentConverter(OfficeManager officeManager) {
         this(officeManager, new DefaultDocumentFormatRegistry());
@@ -41,8 +40,8 @@ public class OfficeDocumentConverter {
         this.formatRegistry = formatRegistry;
     }
 
-    private Map<String,Object> createDefaultLoadProperties() {
-        Map<String,Object> loadProperties = new HashMap<String,Object>();
+    private Map<String, Object> createDefaultLoadProperties() {
+        Map<String, Object> loadProperties = new HashMap<String, Object>();
         loadProperties.put("Hidden", true);
         loadProperties.put("ReadOnly", true);
         loadProperties.put("UpdateDocMode", UpdateDocMode.QUIET_UPDATE);
@@ -71,5 +70,4 @@ public class OfficeDocumentConverter {
         conversionTask.setInputFormat(inputFormat);
         officeManager.execute(conversionTask);
     }
-
 }

@@ -32,10 +32,12 @@ class PooledOfficeManager implements OfficeManager {
     private final Logger logger = Logger.getLogger(getClass().getName());
 
     private OfficeConnectionEventListener connectionEventListener = new OfficeConnectionEventListener() {
+        @Override
         public void connected(OfficeConnectionEvent event) {
             taskCount = 0;
             taskExecutor.setAvailable(true);
         }
+        @Override
         public void disconnected(OfficeConnectionEvent event) {
             taskExecutor.setAvailable(false);
             if (stopping) {
@@ -62,8 +64,10 @@ class PooledOfficeManager implements OfficeManager {
         taskExecutor = new SuspendableThreadPoolExecutor(new NamedThreadFactory("OfficeTaskThread"));
     }
 
+    @Override
     public void execute(final OfficeTask task) throws OfficeException {
         Future<?> futureTask = taskExecutor.submit(new Runnable() {
+            @Override
             public void run() {
                 if (settings.getMaxTasksPerProcess() > 0 && ++taskCount == settings.getMaxTasksPerProcess() + 1) {
                     logger.info(String.format("reached limit of %d maxTasksPerProcess: restarting", settings.getMaxTasksPerProcess()));
@@ -92,10 +96,12 @@ class PooledOfficeManager implements OfficeManager {
          }
     }
 
+    @Override
     public void start() throws OfficeException {
         managedOfficeProcess.startAndWait();
     }
 
+    @Override
     public void stop() throws OfficeException {
         taskExecutor.setAvailable(false);
         stopping = true;
@@ -103,6 +109,7 @@ class PooledOfficeManager implements OfficeManager {
         managedOfficeProcess.stopAndWait();
     }
 
+    @Override
 	public boolean isRunning() {
 		return managedOfficeProcess.isConnected();
 	}

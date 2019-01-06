@@ -34,6 +34,7 @@ class NamedThreadFactory implements ThreadFactory {
         this.daemon = daemon;
     }
 
+    @Override
     public Thread newThread(Runnable runnable) {
         Thread thread = new Thread(runnable, baseName + "-" + threadIndex.getAndIncrement());
         thread.setDaemon(daemon);

@@ -46,6 +46,7 @@ class ExternalOfficeManager implements OfficeManager {
 		this.connectOnStart = connectOnStart;
 	}
 
+    @Override
 	public void start() throws OfficeException {
 		if (connectOnStart) {
 			synchronized (connection) {
@@ -54,6 +55,7 @@ class ExternalOfficeManager implements OfficeManager {
 		}
 	}
 
+    @Override
 	public void stop() {
 		synchronized (connection) {
 			if (connection.isConnected()) {
@@ -62,6 +64,7 @@ class ExternalOfficeManager implements OfficeManager {
 		}
 	}
 
+    @Override
 	public void execute(OfficeTask task) throws OfficeException {
 		synchronized (connection) {
 			if (!connection.isConnected()) {
@@ -79,6 +82,7 @@ class ExternalOfficeManager implements OfficeManager {
 		}
 	}
 
+    @Override
 	public boolean isRunning() {
 		return connection.isConnected();
 	}

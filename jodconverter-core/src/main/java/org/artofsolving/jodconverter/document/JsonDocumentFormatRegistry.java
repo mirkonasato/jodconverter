@@ -49,7 +49,7 @@ public class JsonDocumentFormatRegistry extends SimpleDocumentFormatRegistry {
             if (jsonFormat.has("storePropertiesByFamily")) {
                 JSONObject jsonStorePropertiesByFamily = jsonFormat.getJSONObject("storePropertiesByFamily");
                 for (String key : JSONObject.getNames(jsonStorePropertiesByFamily)) {
-                    Map<String,?> storeProperties = toJavaMap(jsonStorePropertiesByFamily.getJSONObject(key));
+                    Map<String, ?> storeProperties = toJavaMap(jsonStorePropertiesByFamily.getJSONObject(key));
                     format.setStoreProperties(DocumentFamily.valueOf(key), storeProperties);
                 }
             }
@@ -57,8 +57,8 @@ public class JsonDocumentFormatRegistry extends SimpleDocumentFormatRegistry {
         }
     }
 
-    private Map<String,?> toJavaMap(JSONObject jsonMap) throws JSONException {
-        Map<String,Object> map = new HashMap<String,Object>();
+    private Map<String, ?> toJavaMap(JSONObject jsonMap) throws JSONException {
+        Map<String, Object> map = new HashMap<String, Object>();
         for (String key : JSONObject.getNames(jsonMap)) {
             Object value = jsonMap.get(key);
             if (value instanceof JSONObject) {
@@ -69,5 +69,4 @@ public class JsonDocumentFormatRegistry extends SimpleDocumentFormatRegistry {
         }
         return map;
     }
-
 }

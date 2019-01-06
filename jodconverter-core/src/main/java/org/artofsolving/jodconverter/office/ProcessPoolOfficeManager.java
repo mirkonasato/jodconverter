@@ -51,6 +51,7 @@ class ProcessPoolOfficeManager implements OfficeManager {
         logger.info("ProcessManager implementation is " + processManager.getClass().getSimpleName());
     }
 
+    @Override
     public synchronized void start() throws OfficeException {
         for (int i = 0; i < pooledManagers.length; i++) {
             pooledManagers[i].start();
@@ -59,6 +60,7 @@ class ProcessPoolOfficeManager implements OfficeManager {
         running = true;
     }
 
+    @Override
     public void execute(OfficeTask task) throws IllegalStateException, OfficeException {
         if (!running) {
             throw new IllegalStateException("this OfficeManager is currently stopped");
@@ -77,6 +79,7 @@ class ProcessPoolOfficeManager implements OfficeManager {
         }
     }
 
+    @Override
     public synchronized void stop() throws OfficeException {
         running = false;
         logger.info("stopping");
@@ -103,6 +106,7 @@ class ProcessPoolOfficeManager implements OfficeManager {
         }
     }
 
+    @Override
 	public boolean isRunning() {
 		return running;
 	}
