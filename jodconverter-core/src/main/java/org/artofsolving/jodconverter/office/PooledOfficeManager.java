@@ -107,4 +107,7 @@ class PooledOfficeManager implements OfficeManager {
 		return managedOfficeProcess.isConnected();
 	}
 
+    public void setTaskCount(int taskCount) {
+        this.taskCount = taskCount;
+    }
 }
